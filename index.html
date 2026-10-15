@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cognitive Hands</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23f3a712'/%3E%3C/svg%3E" />
+    <style>
+      :root {
+        --bg: #15171c;
+        --panel: #1d2027;
+        --panel-2: #23272f;
+        --text: #e6e9ef;
+        --muted: #9aa3b5;
+        --accent: #f3a712;
+        --ok: #a8c256;
+        --bad: #e4572e;
+        --line: #343946;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+      #app { display: grid; grid-template-columns: 320px 1fr 380px; grid-template-rows: 100vh; height: 100vh; }
+      aside, #panel { overflow-y: auto; background: var(--panel); padding: 16px; }
+      aside { border-right: 1px solid var(--line); }
+      #panel { border-left: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; }
+      #viewport { position: relative; min-width: 0; min-height: 0; }
+      #viewport canvas { display: block; width: 100% !important; height: 100% !important; }
+      h1 { font-size: 20px; margin: 0 0 4px; }
+      h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 18px 0 8px; }
+      .tagline { color: var(--muted); margin: 0 0 8px; }
+      select, textarea, input[type=number] { width: 100%; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font: inherit; }
+      textarea { resize: vertical; }
+      .description { color: var(--muted); font-size: 12.5px; margin: 8px 0; }
+      .param { display: grid; grid-template-columns: 1fr 44px; gap: 2px 8px; margin: 6px 0; font-size: 12.5px; }
+      .param .name { grid-column: 1 / span 2; color: var(--muted); }
+      .param input { width: 100%; accent-color: var(--accent); }
+      .param .val { text-align: right; font-variant-numeric: tabular-nums; }
+      .inline { display: flex; align-items: center; gap: 8px; margin-top: 8px; color: var(--muted); }
+      .inline input { width: 90px; }
+      .buttons { display: flex; gap: 8px; margin-bottom: 8px; }
+      button { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; font: inherit; cursor: pointer; }
+      button.primary { background: var(--accent); color: #1a1200; border-color: transparent; font-weight: 600; }
+      button:hover { filter: brightness(1.1); }
+      .check { display: flex; gap: 8px; align-items: center; margin-top: 8px; color: var(--muted); }
+      .legend .swatch { display: inline-flex; align-items: center; gap: 6px; margin: 0 10px 6px 0; color: var(--muted); }
+      .legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+      #typed { font: 18px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--panel-2); border-radius: 8px; padding: 10px 12px; min-height: 64px; word-break: break-all; }
+      #typed .ok { color: var(--text); }
+      #typed .wrong { color: var(--bad); text-decoration: underline; }
+      #typed .accidental { color: var(--bad); background: rgba(228, 87, 46, 0.2); }
+      #typed .miss { color: var(--bad); }
+      #typed .cursor { color: var(--accent); animation: blink 1s steps(2) infinite; }
+      @keyframes blink { to { opacity: 0; } }
+      .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+      .stat { display: flex; justify-content: space-between; gap: 8px; background: var(--panel-2); border-radius: 6px; padding: 5px 8px; font-size: 12.5px; }
+      .stat .label { color: var(--muted); }
+      .stat .value { font-variant-numeric: tabular-nums; }
+      table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+      th, td { text-align: right; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+      th:first-child, td:first-child { text-align: left; }
+      th { color: var(--muted); font-weight: 500; }
+      td.ref { color: var(--muted); }
+      .note { color: var(--muted); font-size: 11.5px; margin: 6px 0 0; }
+      canvas.chart { width: 100%; background: var(--panel-2); border-radius: 8px; }
+      #trace .bars { display: flex; gap: 4px; align-items: flex-end; height: 70px; }
+      #trace .bar { display: flex; flex-direction: column; align-items: center; width: 22px; font: 12px ui-monospace, monospace; color: var(--muted); }
+      #trace .bar i { display: block; width: 14px; background: #3d7dca; border-radius: 3px 3px 0 0; }
+      #trace .bar.launched i { background: var(--accent); }
+      #trace p { margin: 6px 0 0; color: var(--muted); font-size: 12.5px; }
+      footer { color: var(--muted); font-size: 11.5px; margin-top: auto; }
+      footer a { color: var(--muted); }
+      @media (max-width: 1100px) {
+        #app { grid-template-columns: 1fr; grid-template-rows: auto 60vh auto; height: auto; }
+        aside { border-right: 0; border-bottom: 1px solid var(--line); }
+        #panel { border-left: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="controls"></aside>
+      <main id="viewport"></main>
+      <section id="panel">
+        <div>
+          <h2 style="margin-top:0">Typed</h2>
+          <div id="typed"></div>
+        </div>
+        <div>
+          <h2>Model state</h2>
+          <div id="trace"></div>
+        </div>
+        <div>
+          <h2>Keystroke timing</h2>
+          <canvas id="iki-chart" class="chart" width="340" height="200"></canvas>
+          <canvas id="iki-hist" class="chart" width="340" height="120" style="margin-top:8px"></canvas>
+        </div>
+        <div id="metrics"></div>
+        <footer>
+          Drag to orbit, scroll to zoom. Keys glow blue as the model prepares them and orange when pressed.
+          <a href="https://github.com/CrumpLabSandbox/CognitiveHands">Source</a>
+        </footer>
+      </section>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

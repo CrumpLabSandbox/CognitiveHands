@@ -1,0 +1,20 @@
+{
+  "name": "cognitive-hands",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Anatomically detailed simulated hands driven by cognitive models of action sequencing",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "vitest": "^2.1.0"
+  }
+}
