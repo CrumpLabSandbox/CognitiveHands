@@ -100,7 +100,10 @@ export function buildControls(root, { models, motorParams, defaultText, onReset,
 
   root.replaceChildren(
     el('h1', { text: 'Cognitive Hands' }),
-    el('p', { class: 'tagline', text: 'Simulated hands under the control of models of action sequencing.' }),
+    el('p', { class: 'tagline' }, [
+      'Simulated hands under the control of models of action sequencing. ',
+      el('a', { class: 'about-link', href: './about.html', text: 'What is this?' }),
+    ]),
     el('section', {}, [el('h2', { text: 'Cognitive model' }), modelSelect, description, paramBox]),
     el('section', {}, [el('h2', { text: 'Motor layer' }), motorBox]),
     el('section', {}, [
